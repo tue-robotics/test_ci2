@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get commit_range
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]
+          then
+            echo "event: pull_request"
+            oldest_commit=${{ github.event.pull_request.base.sha }}
+            newest_commit=${{ github.event.pull_request.head.sha }}
+          elif [ "$GITHUB_EVENT_NAME" == "push" ]
+          then
+            echo "event: push"
+            oldest_commit=${{ github.event.before }}
+            newest_commit=${{ github.event.after }}
+          fi
+          echo "oldest_commit: $oldest_commit"
+          echo "newest_commit: $newest_commit"
+      - run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+      - name: Dump github context
+        run:   echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
